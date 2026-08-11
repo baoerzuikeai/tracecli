@@ -1,0 +1,21 @@
+# tracecli 配置文件示例
+
+# 串口默认配置（可在 TUI 内覆盖）
+serial:
+  default_port: ""          # 留空则在启动时自动枚举
+  baud_rate: 115200
+  latency_ms: 1             # CH341 USB 延迟计时器，越小越快
+
+# 协议分节（协议特有参数，新增协议在此加节）
+protocols:
+  i2c:
+    clock: 100000
+  spi:
+    mode: 0
+    clock: 1000000
+
+# 行为
+behavior:
+  auto_rescan_on_connect: true   # 连接后自动扫描
+  auto_reconnect: true           # 掉线自动重连（指数退避）
+  terminal_check: true           # 检测 Windows Terminal，否则尝试拉起
