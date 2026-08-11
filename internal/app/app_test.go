@@ -129,6 +129,42 @@ func TestEventBus(t *testing.T) {
 	}
 }
 
+func TestEventBusFullBufferKeepsReadyEvent(t *testing.T) {
+	application, err := New(adapter.NewMock(), Config{EventBuffer: 32})
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+	events := application.Subscribe()
+
+	for index := 0; index < 31; index++ {
+		application.Events().Publish(Event{
+			Type:    EventStateChanged,
+			State:   Connecting,
+			Attempt: index + 1,
+		})
+	}
+	application.Events().Publish(Event{
+		Type:  EventStateChanged,
+		State: Ready,
+	})
+
+	foundReady := false
+	for index := 0; index < 32; index++ {
+		select {
+		case event := <-events:
+			if event.State == Ready {
+				foundReady = true
+			}
+		case <-time.After(time.Second):
+			t.Fatal("timed out draining event buffer")
+		}
+	}
+	if !foundReady {
+		t.Fatal("Ready event was dropped from a full buffer")
+	}
+	application.Events().Close()
+}
+
 func waitForState(t *testing.T, events <-chan Event, state State) Event {
 	t.Helper()
 	deadline := time.NewTimer(2 * time.Second)
