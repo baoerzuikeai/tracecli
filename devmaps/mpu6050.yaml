@@ -1,0 +1,33 @@
+device: MPU6050
+vendor: TDK InvenSense
+addresses: [0x68, 0x69]
+fingerprint:
+  - reg: 0x75
+    value: 0x68
+registers:
+  - name: WHO_AM_I
+    addr: 0x75
+    rw: r
+    reset: 0x68
+  - name: CTRL1
+    addr: 0x6B
+    rw: rw
+    default: 0x00
+    bits:
+      - name: DEVICE_RESET
+        bit: 7
+        rw: w
+      - name: SLEEP
+        bit: 6
+        rw: rw
+      - name: RANGE
+        bit: [3, 4]
+        rw: rw
+operations:
+  - name: FULL_RESET
+    steps:
+      - type: write
+        reg: 0x6B
+        data: [0x80]
+      - type: delay
+        ms: 100
